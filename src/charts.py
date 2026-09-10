@@ -1084,9 +1084,14 @@ def create_valuation_vs_investment_chart(df):
             xanchor="center",
             x=0.5,
             title_text="",
-            font=dict(size=11),
+            font=dict(size=10),
             itemsizing="constant",
-            itemwidth=30,
+            # Reserva uma fatia fixa da largura por item: sem isso o
+            # Plotly dimensiona pelo texto original e a traducao
+            # automatica do navegador faz os rotulos se sobreporem.
+            entrywidth=0.25,
+            entrywidthmode="fraction",
+            tracegroupgap=4,
         ),
     )
 
@@ -1302,9 +1307,14 @@ def create_valuation_vs_investment_chart(df):
             xanchor="center",
             x=0.5,
             title_text="",
-            font=dict(size=11),
+            font=dict(size=10),
             itemsizing="constant",
-            itemwidth=30,
+            # Reserva uma fatia fixa da largura por item: sem isso o
+            # Plotly dimensiona pelo texto original e a traducao
+            # automatica do navegador faz os rotulos se sobreporem.
+            entrywidth=0.25,
+            entrywidthmode="fraction",
+            tracegroupgap=4,
         ),
     )
 
