@@ -998,10 +998,8 @@ def create_valuation_vs_investment_chart(df):
     if dados.empty:
         return empty_figure()
 
-    # Investimento em US$ mi e valuation em US$ bi: cada eixo na
-    # ordem de grandeza real dos dados, evitando o achatamento.
-    dados["Funding_M"] = dados["Funding_Amount_USD"] / 1e6
-    dados["Valuation_B"] = dados["Valuation_USD"] / 1e9
+    dados["Funding_T"] = dados["Funding_Amount_USD"] / 1e12
+    dados["Valuation_T"] = dados["Valuation_USD"] / 1e12
 
     # Amostra menor deixa as cores por indústria distinguíveis.
     if len(dados) > 4000:
@@ -1011,15 +1009,15 @@ def create_valuation_vs_investment_chart(df):
 
     fig = px.scatter(
         dados,
-        x="Funding_M",
-        y="Valuation_B",
+        x="Funding_T",
+        y="Valuation_T",
         color="Industry",
         color_discrete_sequence=INDUSTRY_COLORS,
         hover_data=["Country"],
         render_mode="webgl",
         labels={
-            "Funding_M": "Investimento Captado (US$ mi)",
-            "Valuation_B": "Valuation (US$ bi)",
+            "Funding_T": "Investimento Captado (US$ tri)",
+            "Valuation_T": "Valuation (US$ tri)",
             "Industry": "Indústria",
             "Country": "País",
         },
@@ -1034,11 +1032,14 @@ def create_valuation_vs_investment_chart(df):
         hovertemplate=(
             "<b>%{fullData.name}</b><br>"
             "País: %{customdata[0]}<br>"
-            "Investimento: US$ %{x:.1f} mi<br>"
-            "Valuation: US$ %{y:.2f} bi"
+            "Investimento: US$ %{x:.6f} tri<br>"
+            "Valuation: US$ %{y:.5f} tri"
             "<extra></extra>"
         ),
     )
+
+    fig.update_xaxes(tickformat=".4f")
+    fig.update_yaxes(tickformat=".3f")
 
     fig.update_layout(
         legend=dict(
@@ -1180,10 +1181,8 @@ def create_valuation_vs_investment_chart(df):
     if dados.empty:
         return empty_figure()
 
-    # Investimento em US$ mi e valuation em US$ bi: cada eixo na
-    # ordem de grandeza real dos dados, evitando o achatamento.
-    dados["Funding_M"] = dados["Funding_Amount_USD"] / 1e6
-    dados["Valuation_B"] = dados["Valuation_USD"] / 1e9
+    dados["Funding_T"] = dados["Funding_Amount_USD"] / 1e12
+    dados["Valuation_T"] = dados["Valuation_USD"] / 1e12
 
     # Amostra menor deixa as cores por indústria distinguíveis.
     if len(dados) > 4000:
@@ -1193,15 +1192,15 @@ def create_valuation_vs_investment_chart(df):
 
     fig = px.scatter(
         dados,
-        x="Funding_M",
-        y="Valuation_B",
+        x="Funding_T",
+        y="Valuation_T",
         color="Industry",
         color_discrete_sequence=INDUSTRY_COLORS,
         hover_data=["Country"],
         render_mode="webgl",
         labels={
-            "Funding_M": "Investimento Captado (US$ mi)",
-            "Valuation_B": "Valuation (US$ bi)",
+            "Funding_T": "Investimento Captado (US$ tri)",
+            "Valuation_T": "Valuation (US$ tri)",
             "Industry": "Indústria",
             "Country": "País",
         },
@@ -1216,11 +1215,14 @@ def create_valuation_vs_investment_chart(df):
         hovertemplate=(
             "<b>%{fullData.name}</b><br>"
             "País: %{customdata[0]}<br>"
-            "Investimento: US$ %{x:.1f} mi<br>"
-            "Valuation: US$ %{y:.2f} bi"
+            "Investimento: US$ %{x:.6f} tri<br>"
+            "Valuation: US$ %{y:.5f} tri"
             "<extra></extra>"
         ),
     )
+
+    fig.update_xaxes(tickformat=".4f")
+    fig.update_yaxes(tickformat=".3f")
 
     fig.update_layout(
         legend=dict(
