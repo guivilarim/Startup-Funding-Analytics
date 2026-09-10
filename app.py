@@ -198,7 +198,7 @@ with tab_visao_geral:
         with col2:
 
             metric_card(
-                f"${total_investimento:.1f}B",
+                f"${total_investimento:.2f}T",
                 "Total Investimento",
                 "Capital acumulado no recorte",
                 ROSE,
@@ -637,7 +637,7 @@ with tab_mercado:
     .groupby("Country")["Funding_Amount_USD"]
     .sum()
     .max()
-    / 1e9
+    / 1e12
     if not df_filtrado.empty
     else 0
 )
@@ -659,7 +659,7 @@ with tab_mercado:
     .groupby("Industry")["Funding_Amount_USD"]
     .sum()
     .max()
-    / 1e9
+    / 1e12
     if not df_filtrado.empty
     else 0
     )
@@ -680,7 +680,7 @@ with tab_mercado:
 
     with col1:
         metric_card(
-            f"${maior_pais_valor:.1f}B",
+            f"${maior_pais_valor:.2f}T",
             "Maior País",
             maior_pais,
             CYAN,
@@ -689,7 +689,7 @@ with tab_mercado:
 
     with col2:
         metric_card(
-            f"${maior_industria_valor:.1f}B",
+            f"${maior_industria_valor:.2f}T",
             "Maior Indústria",
             maior_industria,
             ROSE,
@@ -830,7 +830,7 @@ with tab_evolucao:
     )
 
     capital_pico = (
-        capital_por_ano.max() / 1e9
+        capital_por_ano.max() / 1e12
         if not capital_por_ano.empty
         else 0
     )
@@ -839,7 +839,7 @@ with tab_evolucao:
 
     with col1:
         metric_card(
-            f"${capital_pico:.1f}B",
+            f"${capital_pico:.2f}T",
             "Pico de Capital",
             f"Ano {ano_pico}",
             CYAN,
@@ -1088,7 +1088,7 @@ with tab_valuation:
             fig,
             "Valuation × Investimento",
             height=400,
-            showlegend=False,
+            showlegend=True,
         )
 
         st.plotly_chart(
@@ -1152,7 +1152,7 @@ with tab_unicornios:
             dados_unicornio["Funding_Amount_USD"]
             .dropna()
             .mean()
-            / 1e9
+            / 1e6
         )
 
     else:
@@ -1195,7 +1195,7 @@ with tab_unicornios:
 
     with col4:
         metric_card(
-            f"${funding_unicornio:.2f}B",
+            f"${funding_unicornio:.1f}M",
             "Funding Médio",
             "Entre os unicórnios",
             VIOLET,

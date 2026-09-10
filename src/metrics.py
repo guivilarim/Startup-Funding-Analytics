@@ -2,7 +2,7 @@ def calculate_metrics(df_filtrado):
     total_startups = len(df_filtrado)
 
     total_investimento = (
-        df_filtrado["Total_Funding_USD"].sum() / 1e9
+        df_filtrado["Total_Funding_USD"].sum() / 1e12
     )
 
     media_valuation = (

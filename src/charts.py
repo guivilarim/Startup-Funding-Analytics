@@ -2,6 +2,18 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+# Paleta categórica do dashboard (mesmas cores dos KPIs).
+INDUSTRY_COLORS = [
+    "#22D3EE",  # CYAN
+    "#F43F5E",  # ROSE
+    "#F59E0B",  # AMBER
+    "#8B5CF6",  # VIOLET
+    "#10B981",  # EMERALD
+    "#3B82F6",  # BLUE
+    "#F472B6",  # ROSE claro
+    "#A3E635",  # LIME
+]
+
 def empty_figure():
     fig = go.Figure()
 
@@ -986,21 +998,27 @@ def create_valuation_vs_investment_chart(df):
     if dados.empty:
         return empty_figure()
 
-    dados["Funding_B"] = dados["Funding_Amount_USD"] / 1e9
+    # Investimento em US$ mi e valuation em US$ bi: cada eixo na
+    # ordem de grandeza real dos dados, evitando o achatamento.
+    dados["Funding_M"] = dados["Funding_Amount_USD"] / 1e6
     dados["Valuation_B"] = dados["Valuation_USD"] / 1e9
 
-    # Evita sobrecarregar o gráfico com muitos pontos.
-    if len(dados) > 10000:
-        dados = dados.sample(10000, random_state=42)
+    # Amostra menor deixa as cores por indústria distinguíveis.
+    if len(dados) > 4000:
+        dados = dados.sample(4000, random_state=42)
+
+    dados = dados.sort_values("Industry")
 
     fig = px.scatter(
         dados,
-        x="Funding_B",
+        x="Funding_M",
         y="Valuation_B",
-        hover_data=["Industry", "Country"],
+        color="Industry",
+        color_discrete_sequence=INDUSTRY_COLORS,
+        hover_data=["Country"],
         render_mode="webgl",
         labels={
-            "Funding_B": "Investimento Captado (US$ bi)",
+            "Funding_M": "Investimento Captado (US$ mi)",
             "Valuation_B": "Valuation (US$ bi)",
             "Industry": "Indústria",
             "Country": "País",
@@ -1009,16 +1027,30 @@ def create_valuation_vs_investment_chart(df):
 
     fig.update_traces(
         marker=dict(
-            color="#F59E0B",
-            size=6,
-            opacity=0.55,
+            size=5,
+            opacity=0.45,
+            line=dict(width=0),
         ),
         hovertemplate=(
-            "<b>%{customdata[0]}</b><br>"
-            "País: %{customdata[1]}<br>"
-            "Investimento: US$ %{x:.2f} bi<br>"
+            "<b>%{fullData.name}</b><br>"
+            "País: %{customdata[0]}<br>"
+            "Investimento: US$ %{x:.1f} mi<br>"
             "Valuation: US$ %{y:.2f} bi"
             "<extra></extra>"
+        ),
+    )
+
+    fig.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.22,
+            xanchor="center",
+            x=0.5,
+            title_text="",
+            font=dict(size=11),
+            itemsizing="constant",
+            itemwidth=30,
         ),
     )
 
@@ -1148,36 +1180,59 @@ def create_valuation_vs_investment_chart(df):
     if dados.empty:
         return empty_figure()
 
-    dados["Funding_B"] = dados["Funding_Amount_USD"] / 1e9
+    # Investimento em US$ mi e valuation em US$ bi: cada eixo na
+    # ordem de grandeza real dos dados, evitando o achatamento.
+    dados["Funding_M"] = dados["Funding_Amount_USD"] / 1e6
     dados["Valuation_B"] = dados["Valuation_USD"] / 1e9
 
-    if len(dados) > 10000:
-        dados = dados.sample(10000, random_state=42)
+    # Amostra menor deixa as cores por indústria distinguíveis.
+    if len(dados) > 4000:
+        dados = dados.sample(4000, random_state=42)
+
+    dados = dados.sort_values("Industry")
 
     fig = px.scatter(
         dados,
-        x="Funding_B",
+        x="Funding_M",
         y="Valuation_B",
-        hover_data=["Industry", "Country"],
+        color="Industry",
+        color_discrete_sequence=INDUSTRY_COLORS,
+        hover_data=["Country"],
         render_mode="webgl",
         labels={
-            "Funding_B": "Investimento Captado (US$ bi)",
+            "Funding_M": "Investimento Captado (US$ mi)",
             "Valuation_B": "Valuation (US$ bi)",
+            "Industry": "Indústria",
+            "Country": "País",
         },
     )
 
     fig.update_traces(
         marker=dict(
-            color="#9A620D",
             size=5,
-            opacity=0.42,
+            opacity=0.45,
+            line=dict(width=0),
         ),
         hovertemplate=(
-            "<b>%{customdata[0]}</b><br>"
-            "País: %{customdata[1]}<br>"
-            "Investimento: US$ %{x:.2f} bi<br>"
+            "<b>%{fullData.name}</b><br>"
+            "País: %{customdata[0]}<br>"
+            "Investimento: US$ %{x:.1f} mi<br>"
             "Valuation: US$ %{y:.2f} bi"
             "<extra></extra>"
+        ),
+    )
+
+    fig.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.22,
+            xanchor="center",
+            x=0.5,
+            title_text="",
+            font=dict(size=11),
+            itemsizing="constant",
+            itemwidth=30,
         ),
     )
 
