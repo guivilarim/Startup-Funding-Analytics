@@ -1038,8 +1038,22 @@ def create_valuation_vs_investment_chart(df):
         ),
     )
 
-    fig.update_xaxes(tickformat=".4f")
-    fig.update_yaxes(tickformat=".3f")
+    # A nuvem e densa e uniforme: abrir ja aproximado num recorte
+    # espalha os pontos e deixa as cores por industria legiveis.
+    # Duplo clique ou scroll volta para a visao completa.
+    x_zoom = dados["Funding_T"].quantile(0.30)
+    y_zoom = dados["Valuation_T"].quantile(0.30)
+
+    fig.update_xaxes(
+        range=[0, x_zoom],
+        tickformat=".5f",
+        nticks=6,
+    )
+    fig.update_yaxes(
+        range=[0, y_zoom],
+        tickformat=".4f",
+        nticks=6,
+    )
 
     fig.update_layout(
         legend=dict(
@@ -1221,8 +1235,22 @@ def create_valuation_vs_investment_chart(df):
         ),
     )
 
-    fig.update_xaxes(tickformat=".4f")
-    fig.update_yaxes(tickformat=".3f")
+    # A nuvem e densa e uniforme: abrir ja aproximado num recorte
+    # espalha os pontos e deixa as cores por industria legiveis.
+    # Duplo clique ou scroll volta para a visao completa.
+    x_zoom = dados["Funding_T"].quantile(0.30)
+    y_zoom = dados["Valuation_T"].quantile(0.30)
+
+    fig.update_xaxes(
+        range=[0, x_zoom],
+        tickformat=".5f",
+        nticks=6,
+    )
+    fig.update_yaxes(
+        range=[0, y_zoom],
+        tickformat=".4f",
+        nticks=6,
+    )
 
     fig.update_layout(
         legend=dict(

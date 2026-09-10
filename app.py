@@ -1094,7 +1094,10 @@ with tab_valuation:
         st.plotly_chart(
             fig,
             use_container_width=True,
-            config={"displayModeBar": False},
+            config={
+                "displayModeBar": False,
+                "scrollZoom": True,
+            },
         )
 
     with col2:
