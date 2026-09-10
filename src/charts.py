@@ -1005,6 +1005,26 @@ def create_valuation_vs_investment_chart(df):
     if len(dados) > 4000:
         dados = dados.sample(4000, random_state=42)
 
+    # Ordem alfabetica, com EdTech deslocada para o fim da legenda.
+    # A cor de cada industria continua vindo da posicao alfabetica,
+    # entao reordenar a legenda nao troca as cores do grafico.
+    industrias = sorted(dados["Industry"].unique())
+
+    cores = {
+        industria: INDUSTRY_COLORS[i % len(INDUSTRY_COLORS)]
+        for i, industria in enumerate(industrias)
+    }
+
+    if "EdTech" in industrias:
+        industrias.remove("EdTech")
+        industrias.append("EdTech")
+
+    dados["Industry"] = pd.Categorical(
+        dados["Industry"],
+        categories=industrias,
+        ordered=True,
+    )
+
     dados = dados.sort_values("Industry")
 
     fig = px.scatter(
@@ -1012,7 +1032,8 @@ def create_valuation_vs_investment_chart(df):
         x="Funding_T",
         y="Valuation_T",
         color="Industry",
-        color_discrete_sequence=INDUSTRY_COLORS,
+        color_discrete_map=cores,
+        category_orders={"Industry": industrias},
         hover_data=["Country"],
         render_mode="webgl",
         labels={
@@ -1202,6 +1223,26 @@ def create_valuation_vs_investment_chart(df):
     if len(dados) > 4000:
         dados = dados.sample(4000, random_state=42)
 
+    # Ordem alfabetica, com EdTech deslocada para o fim da legenda.
+    # A cor de cada industria continua vindo da posicao alfabetica,
+    # entao reordenar a legenda nao troca as cores do grafico.
+    industrias = sorted(dados["Industry"].unique())
+
+    cores = {
+        industria: INDUSTRY_COLORS[i % len(INDUSTRY_COLORS)]
+        for i, industria in enumerate(industrias)
+    }
+
+    if "EdTech" in industrias:
+        industrias.remove("EdTech")
+        industrias.append("EdTech")
+
+    dados["Industry"] = pd.Categorical(
+        dados["Industry"],
+        categories=industrias,
+        ordered=True,
+    )
+
     dados = dados.sort_values("Industry")
 
     fig = px.scatter(
@@ -1209,7 +1250,8 @@ def create_valuation_vs_investment_chart(df):
         x="Funding_T",
         y="Valuation_T",
         color="Industry",
-        color_discrete_sequence=INDUSTRY_COLORS,
+        color_discrete_map=cores,
+        category_orders={"Industry": industrias},
         hover_data=["Country"],
         render_mode="webgl",
         labels={
