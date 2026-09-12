@@ -1,7 +1,8 @@
 import streamlit as st
 from pathlib import Path
 from src.data import load_data
-from src.filters import render_filters, apply_filters
+from src.filters import render_filters, apply_filters, CLICK_FILTER_SOURCES, marker_key_for
+
 from src.metrics import calculate_metrics
 from src.charts import (
     create_funding_map,
@@ -125,6 +126,92 @@ st.markdown(
 # DATA
 # ==========================================================
 df = load_data(DATA_FILE)
+
+
+# ==========================================================
+# CROSS-FILTERING
+# ==========================================================
+
+_industrias_disponiveis = sorted(
+    df["Industry"].dropna().unique().tolist()
+)
+
+_ano_min = int(df["Year"].min())
+_ano_max = int(df["Year"].max())
+
+_RESET_VALUE_BY_FILTER = {
+    "flt_pais": "Todos",
+    "flt_industrias": _industrias_disponiveis,
+    "flt_periodo": (_ano_min, _ano_max),
+}
+
+_GET_VALUE_BY_SOURCE = {
+    ("map_click", "flt_pais"):
+        lambda p: (p.get("customdata") or [None])[0],
+    ("ranking_click", "flt_industrias"):
+        lambda p: [p.get("y")],
+    ("country_investment_click", "flt_pais"):
+        lambda p: p.get("y"),
+    ("avg_investment_click", "flt_pais"):
+        lambda p: p.get("y"),
+    ("country_scatter_click", "flt_pais"):
+        lambda p: (p.get("customdata") or [None])[0],
+    ("heatmap_click", "flt_pais"):
+        lambda p: (p.get("customdata") or [None, None])[0],
+    ("heatmap_click", "flt_industrias"):
+        lambda p: [(p.get("customdata") or [None, None])[1]],
+    ("capital_evolution_click", "flt_periodo"):
+        lambda p: (int(p.get("x")), int(p.get("x"))),
+    ("growth_evolution_click", "flt_periodo"):
+        lambda p: (int(p.get("x")), int(p.get("x"))),
+    ("rounds_evolution_click", "flt_periodo"):
+        lambda p: (int(p.get("x")), int(p.get("x"))),
+    ("avg_ticket_click", "flt_periodo"):
+        lambda p: (int(p.get("x")), int(p.get("x"))),
+    ("avg_valuation_click", "flt_industrias"):
+        lambda p: [p.get("y")],
+    ("valuation_scatter_click", "flt_industrias"):
+        lambda p: [(p.get("customdata") or [None, None])[1]],
+    ("valuation_evolution_click", "flt_periodo"):
+        lambda p: (int(p.get("x")), int(p.get("x"))),
+    ("unicorns_industry_click", "flt_industrias"):
+        lambda p: [p.get("y")],
+    ("unicorns_country_click", "flt_pais"):
+        lambda p: p.get("y"),
+    ("unicorn_evolution_click", "flt_periodo"):
+        lambda p: (int(p.get("x")), int(p.get("x"))),
+}
+
+_FILTERS_BY_EVENT = {}
+for _event_key, _filter_key in CLICK_FILTER_SOURCES:
+    _FILTERS_BY_EVENT.setdefault(_event_key, []).append(_filter_key)
+
+
+def _make_click_callback(event_key):
+    def _on_select():
+        event = st.session_state.get(event_key)
+
+        points = (
+            event.get("selection", {}).get("points", [])
+            if event
+            else []
+        )
+
+        point = points[0] if points else None
+
+        for filter_key in _FILTERS_BY_EVENT[event_key]:
+            get_value = _GET_VALUE_BY_SOURCE[(event_key, filter_key)]
+
+            value = get_value(point) if point is not None else None
+
+            st.session_state[marker_key_for(event_key, filter_key)] = value
+            st.session_state[filter_key] = (
+                value
+                if value is not None
+                else _RESET_VALUE_BY_FILTER[filter_key]
+            )
+
+    return _on_select
 
 
 # ==========================================================
@@ -313,10 +400,17 @@ with tab_visao_geral:
 
             st.plotly_chart(
                 fig1,
-                use_container_width=True,
+                width="stretch",
                 config={
                     "displayModeBar": False
                 },
+                on_select=_make_click_callback("map_click"),
+                selection_mode=["points"],
+                key="map_click",
+            )
+
+            st.caption(
+                "Clique em um país para filtrar o dashboard inteiro."
             )
 
            # ======================================================
@@ -511,10 +605,17 @@ with tab_visao_geral:
 
             st.plotly_chart(
                 fig2,
-                use_container_width=True,
+                width="stretch",
                 config={
                     "displayModeBar": False
                 },
+                on_select=_make_click_callback("ranking_click"),
+                selection_mode=["points"],
+                key="ranking_click",
+            )
+
+            st.caption(
+                "Clique em uma barra para isolar a indústria."
             )
     # ==========================================================
     # GRÁFICOS — LINHA 2
@@ -735,7 +836,14 @@ with tab_mercado:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
+            on_select=_make_click_callback("country_investment_click"),
+            selection_mode=["points"],
+            key="country_investment_click",
+        )
+
+        st.caption(
+            "Clique num país para filtrar o dashboard."
         )
 
     with col2:
@@ -752,7 +860,14 @@ with tab_mercado:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
+            on_select=_make_click_callback("avg_investment_click"),
+            selection_mode=["points"],
+            key="avg_investment_click",
+        )
+
+        st.caption(
+            "Clique num país para filtrar o dashboard."
         )
 
     col1, col2 = st.columns(2)
@@ -771,7 +886,15 @@ with tab_mercado:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
+            config={"displayModeBar": False},
+            on_select=_make_click_callback("heatmap_click"),
+            selection_mode=["points"],
+            key="heatmap_click",
+        )
+
+        st.caption(
+            "Clique num quadrado para filtrar por país e indústria."
         )
 
     with col2:
@@ -788,7 +911,14 @@ with tab_mercado:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
+            on_select=_make_click_callback("country_scatter_click"),
+            selection_mode=["points"],
+            key="country_scatter_click",
+        )
+
+        st.caption(
+            "Clique num ponto para filtrar por país."
         )
 
 with tab_evolucao:
@@ -904,7 +1034,10 @@ with tab_evolucao:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
+            on_select=_make_click_callback("capital_evolution_click"),
+            selection_mode=["points"],
+            key="capital_evolution_click",
         )
 
     with col2:
@@ -921,7 +1054,10 @@ with tab_evolucao:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
+            on_select=_make_click_callback("growth_evolution_click"),
+            selection_mode=["points"],
+            key="growth_evolution_click",
         )
 
     # ==========================================================
@@ -944,7 +1080,10 @@ with tab_evolucao:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
+            on_select=_make_click_callback("rounds_evolution_click"),
+            selection_mode=["points"],
+            key="rounds_evolution_click",
         )
 
     with col2:
@@ -961,7 +1100,10 @@ with tab_evolucao:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
+            on_select=_make_click_callback("avg_ticket_click"),
+            selection_mode=["points"],
+            key="avg_ticket_click",
         )
 
 with tab_valuation:
@@ -1069,8 +1211,15 @@ with tab_valuation:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
             config={"displayModeBar": False},
+            on_select=_make_click_callback("avg_valuation_click"),
+            selection_mode=["points"],
+            key="avg_valuation_click",
+        )
+
+        st.caption(
+            "Clique numa barra para filtrar por indústria."
         )
 
     # =========================================================
@@ -1093,11 +1242,18 @@ with tab_valuation:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
             config={
                 "displayModeBar": False,
                 "scrollZoom": True,
             },
+            on_select=_make_click_callback("valuation_scatter_click"),
+            selection_mode=["points"],
+            key="valuation_scatter_click",
+        )
+
+        st.caption(
+            "Clique num ponto para filtrar por indústria."
         )
 
     with col2:
@@ -1114,8 +1270,11 @@ with tab_valuation:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
             config={"displayModeBar": False},
+            on_select=_make_click_callback("valuation_evolution_click"),
+            selection_mode=["points"],
+            key="valuation_evolution_click",
         )
 
 with tab_unicornios:
@@ -1235,8 +1394,15 @@ with tab_unicornios:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
             config={"displayModeBar": False},
+            on_select=_make_click_callback("unicorns_industry_click"),
+            selection_mode=["points"],
+            key="unicorns_industry_click",
+        )
+
+        st.caption(
+            "Clique numa barra para filtrar por indústria."
         )
 
     with col2:
@@ -1298,8 +1464,15 @@ with tab_unicornios:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
             config={"displayModeBar": False},
+            on_select=_make_click_callback("unicorns_country_click"),
+            selection_mode=["points"],
+            key="unicorns_country_click",
+        )
+
+        st.caption(
+            "Clique numa barra para filtrar por país."
         )
 
     with col2:
@@ -1326,8 +1499,11 @@ with tab_unicornios:
 
         st.plotly_chart(
             fig,
-            use_container_width=True,
+            width="stretch",
             config={"displayModeBar": False},
+            on_select=_make_click_callback("unicorn_evolution_click"),
+            selection_mode=["points"],
+            key="unicorn_evolution_click",
         )
 
 # ==========================================================
@@ -1364,6 +1540,35 @@ with st.container():
         >
             Fonte: Startup Funding Analytics Dataset (Kaggle)
         </p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f"""
+        <p
+            style='
+                text-align:center;
+                color:{TEXT_MUTED};
+                font-size:12px;
+                margin-bottom:2px;
+            '
+        >
+            Equipe
+        </p>
+        <div
+            style='
+                display:flex;
+                justify-content:center;
+                gap:32px;
+                color:{TEXT_SOFT};
+                font-size:11px;
+            '
+        >
+            <span>André Cezar de Oliveira</span>
+            <span>Caliel José Farias da Silva</span>
+            <span>Guilherme Cavalcanti Vilarim</span>
+        </div>
         """,
         unsafe_allow_html=True,
     )

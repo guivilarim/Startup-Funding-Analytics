@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.colors import sample_colorscale
 
 # Paleta categórica do dashboard (mesmas cores dos KPIs).
 INDUSTRY_COLORS = [
@@ -111,6 +112,7 @@ def create_funding_map(df_filtrado, map_scale):
         locations="ISO",
         color="Funding_Billions",
         hover_name="Country",
+        custom_data=["Country"],
         color_continuous_scale=map_scale,
         labels={"Funding_Billions": "US$ Bilhões"},
         projection="natural earth",
@@ -332,6 +334,7 @@ def create_country_scatter_chart(df_filtrado):
         y="Investment_Billions",
         size="Investment_Billions",
         hover_name="Country",
+        custom_data=["Country"],
         labels={
             "Startups": "Número de Startups",
             "Investment_Billions":
@@ -350,35 +353,113 @@ def create_country_industry_heatmap(df_filtrado):
         df_filtrado["Industry"],
     )
 
-    fig = px.imshow(
-        country_industry,
-        text_auto="d",
-        aspect="auto",
-        color_continuous_scale=[
-            "#172554",
-            "#1E3A8A",
-            "#1D4ED8",
-            "#0284C7",
-            "#22D3EE",
-        ],
-        labels={
-            "x": "Indústria",
-            "y": "País",
-            "color": "Startups",
-        },
+    paises = country_industry.index.tolist()
+    industrias = country_industry.columns.tolist()
+
+    color_scale = [
+        "#172554",
+        "#1E3A8A",
+        "#1D4ED8",
+        "#0284C7",
+        "#22D3EE",
+    ]
+
+    valores = [
+        int(country_industry.loc[pais, industria])
+        for pais in paises
+        for industria in industrias
+    ]
+    vmin, vmax = min(valores), max(valores)
+
+    def normaliza(v):
+        return (v - vmin) / (vmax - vmin) if vmax > vmin else 0.5
+
+    cores = sample_colorscale(
+        color_scale,
+        [normaliza(v) for v in valores],
     )
 
-    fig.update_traces(
+    shapes = []
+    annotations = []
+    click_x, click_y, click_pais, click_industria = [], [], [], []
+
+    k = 0
+    for i, pais in enumerate(paises):
+        for j, industria in enumerate(industrias):
+            valor = valores[k]
+
+            shapes.append(dict(
+                type="rect",
+                x0=j - 0.5,
+                x1=j + 0.5,
+                y0=i - 0.5,
+                y1=i + 0.5,
+                fillcolor=cores[k],
+                line=dict(width=0),
+                layer="below",
+            ))
+
+            annotations.append(dict(
+                x=j,
+                y=i,
+                text=str(valor),
+                showarrow=False,
+                font=dict(color="#F8FAFC", size=11),
+            ))
+
+            click_x.append(j)
+            click_y.append(i)
+            click_pais.append(pais)
+            click_industria.append(industria)
+            k += 1
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=click_x,
+        y=click_y,
+        mode="markers",
+        marker=dict(
+            size=40,
+            opacity=0.02,
+            color=valores,
+            colorscale=color_scale,
+            cmin=vmin,
+            cmax=vmax,
+            showscale=True,
+            colorbar=dict(title="Startups", thickness=12),
+        ),
+        customdata=list(zip(click_pais, click_industria)),
+        text=[str(v) for v in valores],
         hovertemplate=(
-            "<b>País:</b> %{y}"
-            "<br><b>Indústria:</b> %{x}"
-            "<br><b>Startups:</b> %{z}"
+            "<b>País:</b> %{customdata[0]}"
+            "<br><b>Indústria:</b> %{customdata[1]}"
+            "<br><b>Startups:</b> %{text}"
             "<extra></extra>"
-        )
+        ),
+        showlegend=False,
+    ))
+
+    fig.update_layout(
+        shapes=shapes,
+        annotations=annotations,
     )
 
     fig.update_xaxes(
+        tickmode="array",
+        tickvals=list(range(len(industrias))),
+        ticktext=industrias,
         tickangle=-35,
+        range=[-0.5, len(industrias) - 0.5],
+        showgrid=False,
+    )
+
+    fig.update_yaxes(
+        tickmode="array",
+        tickvals=list(range(len(paises))),
+        ticktext=paises,
+        range=[len(paises) - 0.5, -0.5],
+        showgrid=False,
     )
 
     return fig
@@ -1034,7 +1115,7 @@ def create_valuation_vs_investment_chart(df):
         color="Industry",
         color_discrete_map=cores,
         category_orders={"Industry": industrias},
-        hover_data=["Country"],
+        hover_data=["Country", "Industry"],
         render_mode="webgl",
         labels={
             "Funding_T": "Investimento Captado (US$ tri)",
@@ -1257,7 +1338,7 @@ def create_valuation_vs_investment_chart(df):
         color="Industry",
         color_discrete_map=cores,
         category_orders={"Industry": industrias},
-        hover_data=["Country"],
+        hover_data=["Country", "Industry"],
         render_mode="webgl",
         labels={
             "Funding_T": "Investimento Captado (US$ tri)",

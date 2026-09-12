@@ -6,9 +6,9 @@ Dashboard interativo desenvolvido para análise de investimentos, valuation e di
 
 **Grupo 9**
 
-- Andre Oliveira
-- Caliel Farias
-- Guilherme Vilarim
+- André Cezar de Oliveira
+- Caliel José Farias da Silva
+- Guilherme Cavalcanti Vilarim
 
 ## Objetivo
 
@@ -52,6 +52,8 @@ Além disso, o dashboard permite:
 - Alterar a métrica utilizada no ranking
 - Visualizar indicadores atualizados conforme os filtros
 - Explorar os dados por meio de gráficos interativos
+- Interagir com os filtros de país, indústria e período diretamente pelos gráficos e aplica o filtro correspondente em todo o dashboard
+- Redefinir todos os filtros para o estado padrão com um botão
 
 Todos os indicadores e gráficos são atualizados de acordo com os filtros selecionados.
 
@@ -149,6 +151,8 @@ Após a execução, o Streamlit disponibilizará o endereço local para acessar 
 O carregamento dos dados utiliza cache do Streamlit para evitar leituras desnecessárias do arquivo CSV durante as interações com o dashboard.
 
 Os filtros são aplicados antes do cálculo dos indicadores e da geração dos gráficos, garantindo que as visualizações representem o mesmo recorte selecionado pelo usuário.
+
+O filtro ao clicar nos gráficos atualiza os mesmos filtros da barra lateral, então um clique em qualquer gráfico reflete automaticamente em todos os outros. Cliques em país, indústria e período não se sobrepõem entre si e podem ser combinados livremente e redefinidos quando necessário também.
 
 O projeto utiliza uma organização modular para facilitar a manutenção e evolução da aplicação.
 
