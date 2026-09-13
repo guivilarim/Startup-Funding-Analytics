@@ -409,10 +409,6 @@ with tab_visao_geral:
                 key="map_click",
             )
 
-            st.caption(
-                "Clique em um país para filtrar o dashboard inteiro."
-            )
-
            # ======================================================
         # RANKING DINÂMICO
         # ======================================================
@@ -614,9 +610,6 @@ with tab_visao_geral:
                 key="ranking_click",
             )
 
-            st.caption(
-                "Clique em uma barra para isolar a indústria."
-            )
     # ==========================================================
     # GRÁFICOS — LINHA 2
     # ==========================================================
@@ -842,10 +835,6 @@ with tab_mercado:
             key="country_investment_click",
         )
 
-        st.caption(
-            "Clique num país para filtrar o dashboard."
-        )
-
     with col2:
         fig = create_average_investment_chart(
             df_filtrado
@@ -864,10 +853,6 @@ with tab_mercado:
             on_select=_make_click_callback("avg_investment_click"),
             selection_mode=["points"],
             key="avg_investment_click",
-        )
-
-        st.caption(
-            "Clique num país para filtrar o dashboard."
         )
 
     col1, col2 = st.columns(2)
@@ -893,10 +878,6 @@ with tab_mercado:
             key="heatmap_click",
         )
 
-        st.caption(
-            "Clique num quadrado para filtrar por país e indústria."
-        )
-
     with col2:
         fig = create_country_scatter_chart(
             df_filtrado
@@ -915,10 +896,6 @@ with tab_mercado:
             on_select=_make_click_callback("country_scatter_click"),
             selection_mode=["points"],
             key="country_scatter_click",
-        )
-
-        st.caption(
-            "Clique num ponto para filtrar por país."
         )
 
 with tab_evolucao:
@@ -1218,10 +1195,6 @@ with tab_valuation:
             key="avg_valuation_click",
         )
 
-        st.caption(
-            "Clique numa barra para filtrar por indústria."
-        )
-
     # =========================================================
     # LINHA 2 — RELAÇÃO + EVOLUÇÃO
     # =========================================================
@@ -1250,10 +1223,6 @@ with tab_valuation:
             on_select=_make_click_callback("valuation_scatter_click"),
             selection_mode=["points"],
             key="valuation_scatter_click",
-        )
-
-        st.caption(
-            "Clique num ponto para filtrar por indústria."
         )
 
     with col2:
@@ -1401,10 +1370,6 @@ with tab_unicornios:
             key="unicorns_industry_click",
         )
 
-        st.caption(
-            "Clique numa barra para filtrar por indústria."
-        )
-
     with col2:
 
         fig = create_unicorn_valuation_boxplot(
@@ -1469,10 +1434,6 @@ with tab_unicornios:
             on_select=_make_click_callback("unicorns_country_click"),
             selection_mode=["points"],
             key="unicorns_country_click",
-        )
-
-        st.caption(
-            "Clique numa barra para filtrar por país."
         )
 
     with col2:
